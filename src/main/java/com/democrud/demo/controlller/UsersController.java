@@ -1,29 +1,29 @@
 package com.democrud.demo.controlller;
 
-
+import com.democrud.demo.model.User;
+import com.democrud.demo.repositories.UserRepository;
 import com.democrud.demo.service.UserService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 
 @Controller
-@RequestMapping("/user/")
 public class UsersController {
 
-    private final UserService userService;
+    UserService userService;
 
     public UsersController(UserService userService) {
         this.userService = userService;
     }
 
-    @GetMapping(value = "info")
-    public String printUserInfo(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        model.addAttribute("user", userService.getUserByName(auth.getName()));
-
-        return "info";
+    @GetMapping(value = "/user")
+    public String printWelcome(Model model, Principal principal) {
+        String name = principal.getName();
+        User user = (User) userService.loadUserByUsername(name);
+        model.addAttribute("user", user);
+        return "user";
     }
 }

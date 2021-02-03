@@ -1,58 +1,43 @@
 package com.democrud.demo.dao;
 
-import com.democrud.demo.model.Role;
 import com.democrud.demo.model.User;
+import com.democrud.demo.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
+
 @Repository
-@Transactional
 public class UserDaoImpl implements UserDao {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Autowired
+    UserRepository userRepo;
 
     @Override
-    public List<User> showAll() {
-        return entityManager.createQuery("From User").getResultList();
-    }
-
-    @Override
-    public void addAndSave(User user) {
-        entityManager.persist(user);
-    }
-
-    @Override
-    public void delete(Long id) {
-        User user = entityManager.find(User.class, id);
-        entityManager.remove(user);
-    }
-
-    @Override
-    public void edit(User user) {
-
-        entityManager.merge(user);
-    }
-
-
-    @Override
-    public User getById(Long id) {
-        return entityManager.find(User.class, id);
+    public List listAllUsers() {
+        return userRepo.findAll();
 
     }
 
     @Override
-    public User getUserByName(String login) {
-        return entityManager.createQuery("from User where login = :login", User.class).setParameter("login", login).getSingleResult();
+    public User getById(long id) {
+        return userRepo.findById(id).get();
     }
 
     @Override
-    public Role getRoleByName(String role) {
-        return entityManager.createQuery("from Role where role =:role", Role.class).setParameter("role", role).getSingleResult();
+    public void saveUser(User user) {
+        userRepo.save(user);
+    }
+
+    @Override
+    public void updateUser(User user) {
+        userRepo.save(user);
+    }
+
+    @Override
+    public void deleteUser(long id) {
+        userRepo.deleteById(id);
     }
 }
+

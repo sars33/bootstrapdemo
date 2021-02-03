@@ -1,53 +1,68 @@
 package com.democrud.demo.controlller;
 
+import com.democrud.demo.model.Role;
 import com.democrud.demo.model.User;
+
 import com.democrud.demo.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.security.Principal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Controller
-@RequestMapping("/admin/")
+@RequestMapping("/admin")
 public class AdminController {
 
-    private final UserService userService;
+    UserService userService;
 
     public AdminController(UserService userService) {
         this.userService = userService;
     }
 
-    @GetMapping(value = {"users", "/"})
-    public String userList(ModelMap model) {
-        List<User> users = userService.showAll();
-        model.addAttribute("users", users);
-        return "users";
-    }
-
-    @GetMapping(value = "users/add")
-    public String addUser(User user, ModelMap model) {
+    @GetMapping("/")
+    public String showAdminPage(Model model, Principal principal) {
+        String name = principal.getName();
+        User user = (User) userService.loadUserByUsername(name);
         model.addAttribute("user", user);
-        return "add";
+        model.addAttribute("users", userService.listAllUsers());
+        return "admin";
     }
 
-    @PostMapping(value = "users/add")
-    public String addUser(@ModelAttribute("user") User user) {
-        userService.addAndSave(user);
-        return "redirect:/admin/users";
-    }
-
-    @GetMapping(value = "users/{userId}/edit")
-    public String editUser(@PathVariable("userId") Long id, Model model) {
-        User user = userService.getById(id);
+    @GetMapping(value = "/new")
+    public String addNewUserPage(Model model) {
+        User user = new User();
         model.addAttribute("user", user);
-        return "edit";
+        return "admin";
     }
 
-    @PostMapping(value = "users/{userId}/edit")
-    public String editUser(@ModelAttribute("user") User user, @PathVariable("userId") Long id) {
+    @PostMapping(value = "/new")
+    public String saveNewUser(@ModelAttribute("user") User user, @RequestParam("editRoles") String[] roles) {
+
+        Set<Role> roleList = new HashSet<>();
+        for (String role : roles) {
+            roleList.add(userService.getRole(role));
+        }
+        user.setRoles(roleList);
+        userService.saveUser(user);
+        return "redirect:/admin/";
+    }
+
+    @GetMapping(value = "/{id}/edit")
+    public String editUserPage(Model model, @PathVariable("id") int id) {
+        model.addAttribute("user", userService.getById(id));
+        return "admin";
+    }
+
+    @PostMapping(value = "/{id}/edit")
+    public String updateUser(@ModelAttribute("user") User user, @RequestParam("editRoles") String[] roles, int id) {
+        Set<Role> roleList = new HashSet<>();
+        for (String r : roles) {
+            roleList.add(userService.getRole(r));
+        }
         User dbUser = userService.getById(id);
 
         if (user.getPassword().isEmpty()) {
@@ -57,15 +72,14 @@ public class AdminController {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
 
         }
-
-        userService.edit(user);
-
+        user.setRoles(roleList);
+        userService.updateUser(user);
         return "redirect:/admin/";
     }
 
-    @GetMapping(value = {"/users/{userId}/delete"})
-    public String deleteUser(@PathVariable("userId") long id) {
-        userService.delete(id);
-        return "redirect:/admin/users";
+    @PostMapping("/{id}")
+    public String deleteUser(@PathVariable("id") int id) {
+        userService.deleteUser(id);
+        return "redirect:/admin/";
     }
 }

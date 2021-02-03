@@ -2,22 +2,23 @@ package com.democrud.demo.service;
 
 import com.democrud.demo.model.Role;
 import com.democrud.demo.model.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
 public interface UserService {
 
-    List<User> showAll();
+    UserDetails loadUserByUsername(String login);
 
-    void addAndSave(User user);
+    Role getRole(String role);
 
-    void delete(Long id);
+    List<User> listAllUsers();
 
-    void edit(User user);
+    User getById(long id);
 
-    User getById(Long id);
+    void saveUser(User user);
 
-    User getUserByName(String login);
+    void updateUser(User user);
 
-    Role getRoleByName(String role);
+    void deleteUser(long id);
 }

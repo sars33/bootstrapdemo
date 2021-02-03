@@ -1,26 +1,18 @@
 package com.democrud.demo.dao;
 
-import com.democrud.demo.model.Role;
 import com.democrud.demo.model.User;
 
 import java.util.List;
 
 public interface UserDao {
 
-    List<User> showAll();
+    List<User> listAllUsers();
 
-    void addAndSave(User user);
+    User getById(long id);
 
-    void delete(Long id);
+    void saveUser(User user);
 
-    void edit(User user);
+    void updateUser(User user);
 
-    User getById(Long id);
-
-    User getUserByName(String name);
-
-    Role getRoleByName(String name);
+    void deleteUser(long id);
 }
-
-
-
